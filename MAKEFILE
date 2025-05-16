@@ -1,41 +1,27 @@
-# Makefile for memory allocators project
-
-# Compiler settings
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c11 -Iinclude -g
-LDFLAGS = 
-
-# Directories
+LDFLAGS =
 SRC_DIR = src
 TEST_DIR = tests
 BUILD_DIR = build
 BIN_DIR = bin
-
-# Source files
 SRCS = $(wildcard $(SRC_DIR)/*.c)
 TEST_SRCS = $(wildcard $(TEST_DIR)/*.c)
-
-# Object files
 OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRCS))
 TEST_OBJS = $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/%.o,$(TEST_SRCS))
-
-# Executables
 TESTS = $(patsubst $(TEST_DIR)/%.c,$(BIN_DIR)/%,$(TEST_SRCS))
 
-# Main targets
-all: dirs tests
+all: dirs $(TESTS)
 
 dirs:
 	mkdir -p $(BUILD_DIR) $(BIN_DIR)
 
-# Build rules
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/%.o: $(TEST_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Test executables
 $(BIN_DIR)/test_allocators: $(BUILD_DIR)/test_allocators.o $(BUILD_DIR)/allocator.o
 	$(CC) $(LDFLAGS) $^ -o $@
 
@@ -45,24 +31,23 @@ $(BIN_DIR)/test_arraylist: $(BUILD_DIR)/test_arraylist.o $(BUILD_DIR)/allocator.
 $(BIN_DIR)/test_hashtable: $(BUILD_DIR)/test_hashtable.o $(BUILD_DIR)/allocator.o $(BUILD_DIR)/hashtable.o
 	$(CC) $(LDFLAGS) $^ -o $@
 
-# Convenience targets
 allocators: $(BIN_DIR)/test_allocators
 arraylist: $(BIN_DIR)/test_arraylist
 hashtable: $(BIN_DIR)/test_hashtable
 
 tests: $(TESTS)
 
-# Run tests
 test: tests
-	@echo "Running allocator tests..."
-	@./$(BIN_DIR)/test_allocators
-	@echo "Running arraylist tests..."
-	@./$(BIN_DIR)/test_arraylist
-	@echo "Running hashtable tests..."
-	@./$(BIN_DIR)/test_hashtable
-	@echo "All tests passed!"
+	@echo "Запуск тестов..."
+	@echo "----------------------------------------"
+	@$(BIN_DIR)/test_allocators && echo "Аллокаторы: OK"
+	@echo "----------------------------------------"
+	@$(BIN_DIR)/test_arraylist && echo "ArrayList: OK"
+	@echo "----------------------------------------"
+	@$(BIN_DIR)/test_hashtable && echo "HashTable: OK"
+	@echo "----------------------------------------"
+	@echo "Все тесты пройдены успешно!"
 
-# Clean
 clean:
 	rm -rf $(BUILD_DIR) $(BIN_DIR)
 
